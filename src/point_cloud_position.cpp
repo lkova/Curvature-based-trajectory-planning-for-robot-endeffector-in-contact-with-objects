@@ -11,7 +11,6 @@ pointCloudPosition::pointCloudPosition(){
 
     private_node_handle_.param("config", configFile, string("new_node"));
     
-    force = 0.0;
     x = 0.0;
     y = 0.0;
     z = 0.0;
@@ -25,31 +24,35 @@ pointCloudPosition::~pointCloudPosition() {
 }
 
 void pointCloudPosition::lwa4pBlueCurrentPositionCallBack(const  std_msgs::Float64MultiArray &msg) {
-    x = msg.data[6];
-    y = msg.data[7];
-    z = msg.data[8];
+    x = msg.data[0] / 1000;
+    y = msg.data[1] / 1000;
+    z = msg.data[2] / 1000;
 }
 
-void pointCloudPosition::lwa4pBlueForceCallBack(const std_msgs::Float64 &msg) {
-    force = msg.data;
+void pointCloudPosition::lwa4pBlueForceCallBack(const geometry_msgs::Vector3 &msg) {
+    force[0] = msg.x;
+    force[1] = msg.y;
+    force[2] = msg.z;
 }
 
 void pointCloudPosition::run() {
-    ros::Rate r(100);
+    ros::Rate r(20);
     bool temp = true;
 
     PointCloud::Ptr msg(new PointCloud);
     msg->header.frame_id = "map";
     //msg->height = msg->width = 1;
+    double force_sum;
 
     while (ros::ok()) 
     {
-        if(force > 1.0) {
+        force_sum = sqrt(pow(force[0], 2) + pow(force[1], 2) + pow(force[2], 2));
+        if(force_sum >= 0.999) {
             pcl_conversions::toPCL(ros::Time::now(), msg->header.stamp);
             msg->points.push_back(pcl::PointXYZ(x, y, z));
-            lwa4pBluePointCloudPub.publish(msg);
+            lwa4pBluePointCloudPub.publish(msg); 
         }
-        
+      
         ros::spinOnce();
         r.sleep();
     }
