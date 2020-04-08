@@ -71,14 +71,9 @@ namespace gazebo
         
         if(distance < pow(r, 2))
         {
-          //pokemon = 50*(delta_r - delta_r_prev) / td;  
-          //printf("%lf\n",pokemon);
-          //if(fabs(pokemon) > 1.0) printf("KOJI KURAC\n");
-          //double dodaj = fabs(10*(delta_r - delta_r_prev) / td);
-          double dodaj = pow(delta_r, 3) * 1000;
-          //if(dodaj > 1.0)
-          //printf("bxx = %lf, delta_r = %lf\n", dodaj, delta_r);
-          force = dodaj + k * delta_r;
+          
+          double f0 = pow(delta_r, 3) * 1000;
+          force = f0 + k * delta_r;
           /*if(force > 1.35 || force < 0.75) {
             printf("force = %lf\n", force);
           }*/
@@ -95,9 +90,6 @@ namespace gazebo
         pub_msg.z = zf;
         previous_time = current_time;
         delta_r_prev = delta_r;
-        if(force > 1.0) {
-          printf("Sila je veca\n");
-        }
     }
 
     private: physics::ModelPtr model;
